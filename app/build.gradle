@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.udacity.android.bakingapp"
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+}
+
+dependencies {
+
+    def support_version="28.0.0"
+    def recycler_view_version = "28.0.0"
+    def card_view_version = "28.0.0"
+    def picasso_version = "2.5.2"
+    def retrofit_version = "2.4.0"
+    def lifecycle_version = "1.1.1"
+    def exoplayer_version = "r2.2.0"
+
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:$support_version"
+
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+    //RECYCLER-VIEW
+    implementation "com.android.support:recyclerview-v7:$recycler_view_version"
+
+    //CARD-VIEW
+    implementation "com.android.support:cardview-v7:$card_view_version"
+
+    //PICASSO
+    implementation "com.squareup.picasso:picasso:$picasso_version"
+
+    //RETROFIT
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+
+    //ARCH COMPONENTS
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    implementation "android.arch.lifecycle:viewmodel:$lifecycle_version"
+
+    //EXOPLAYER
+    implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
+    implementation "com.android.support:support-media-compat:$support_version"
+
+    //TEST
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-intents:3.0.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation('com.android.support.test.espresso:espresso-contrib:3.0.2') {
+        // Necessary to avoid version conflicts
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude module: 'recyclerview-v7'
+    }
+}
