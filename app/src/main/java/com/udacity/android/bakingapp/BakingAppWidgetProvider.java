@@ -45,7 +45,7 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onEnabled(Context context) {
-        RecipesRepository recipesRepository = InjectorUtils.provideRepository(context);
+        RecipesRepository recipesRepository = InjectorUtils.provideRepository();
         mRecipes = recipesRepository.getRecipes().getValue();
         // Enter relevant functionality for when the first widget is created
     }

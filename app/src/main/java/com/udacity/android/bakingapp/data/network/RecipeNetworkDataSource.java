@@ -2,7 +2,6 @@ package com.udacity.android.bakingapp.data.network;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
 import android.util.Log;
 
 import com.udacity.android.bakingapp.model.Recipe;
@@ -20,22 +19,20 @@ public class RecipeNetworkDataSource {
 
     private static final Object LOCK = new Object();
     private static RecipeNetworkDataSource mInstance;
-    private final Context mContext;
     private final AppExecutors mExecutors;
     private final MutableLiveData<List<Recipe>> mRecipesFromNetwork;
 
-    private RecipeNetworkDataSource(Context context, AppExecutors executors) {
-        this.mContext = context;
+    private RecipeNetworkDataSource(AppExecutors executors) {
         this.mExecutors = executors;
         this.mRecipesFromNetwork = new MutableLiveData<>();
         fetchRecipes();
     }
 
-    public static RecipeNetworkDataSource getInstance(Context context, AppExecutors executors) {
+    public static RecipeNetworkDataSource getInstance(AppExecutors executors) {
         Log.d(TAG, "Getting the network data source");
         if (mInstance == null) {
             synchronized (LOCK) {
-                mInstance = new RecipeNetworkDataSource(context.getApplicationContext(), executors);
+                mInstance = new RecipeNetworkDataSource(executors);
                 Log.d(TAG, "Made new network data source");
             }
         }

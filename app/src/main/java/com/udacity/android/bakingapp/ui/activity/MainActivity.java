@@ -39,7 +39,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void setViewModel() {
-        MainActivityViewModelFactory factory = InjectorUtils.provideMainActivityViewModelFactory(this.getApplicationContext());
+        MainActivityViewModelFactory factory = InjectorUtils.provideMainActivityViewModelFactory();
         mViewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel.class);
         mViewModel.getRecipes().observe(this, new Observer<List<Recipe>>() {
             @Override

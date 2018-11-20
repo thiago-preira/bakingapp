@@ -15,21 +15,18 @@ public class RecipesRepository {
     private static final Object LOCK = new Object();
     private static RecipesRepository sInstance;
     private final RecipeNetworkDataSource mNetworkDataSource;
-    private final AppExecutors mExecutors;
     private final LiveData<List<Recipe>> mRecipes;
 
-    public RecipesRepository(RecipeNetworkDataSource recipeNetworkDataSource,AppExecutors executors) {
-        this.mExecutors = executors;
+    public RecipesRepository(RecipeNetworkDataSource recipeNetworkDataSource) {
         this.mNetworkDataSource = recipeNetworkDataSource;
         this.mRecipes = mNetworkDataSource.getRecipes();
     }
 
-    public static RecipesRepository getInstance(RecipeNetworkDataSource networkDataSource, AppExecutors executors) {
+    public static RecipesRepository getInstance(RecipeNetworkDataSource networkDataSource) {
         Log.d(TAG, "Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new RecipesRepository(networkDataSource,
-                        executors);
+                sInstance = new RecipesRepository(networkDataSource);
                 Log.d(TAG, "Made new repository");
             }
         }

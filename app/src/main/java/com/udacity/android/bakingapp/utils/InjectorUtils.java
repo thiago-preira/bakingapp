@@ -1,27 +1,20 @@
 package com.udacity.android.bakingapp.utils;
 
-import android.content.Context;
-
 import com.udacity.android.bakingapp.data.RecipesRepository;
 import com.udacity.android.bakingapp.data.network.RecipeNetworkDataSource;
 import com.udacity.android.bakingapp.ui.viewmodel.MainActivityViewModelFactory;
 
 public class InjectorUtils {
-    public static RecipeNetworkDataSource provideNetworkDataSource(Context context) {
-        provideRepository(context.getApplicationContext());
-        AppExecutors executors = AppExecutors.getInstance();
-        return RecipeNetworkDataSource.getInstance(context.getApplicationContext(), executors);
-    }
 
-    public static RecipesRepository provideRepository(Context context) {
+    public static RecipesRepository provideRepository() {
         AppExecutors executors = AppExecutors.getInstance();
         RecipeNetworkDataSource networkDataSource =
-                RecipeNetworkDataSource.getInstance(context.getApplicationContext(), executors);
-        return RecipesRepository.getInstance(networkDataSource, executors);
+                RecipeNetworkDataSource.getInstance(executors);
+        return RecipesRepository.getInstance(networkDataSource);
     }
 
-    public static MainActivityViewModelFactory provideMainActivityViewModelFactory(Context context) {
-        RecipesRepository repository = provideRepository(context.getApplicationContext());
+    public static MainActivityViewModelFactory provideMainActivityViewModelFactory() {
+        RecipesRepository repository = provideRepository();
         return new MainActivityViewModelFactory(repository);
     }
 
