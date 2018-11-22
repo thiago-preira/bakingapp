@@ -1,5 +1,7 @@
 package com.udacity.android.bakingapp.ui.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -29,10 +31,18 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.udacity.android.bakingapp.R;
+import com.udacity.android.bakingapp.model.Ingredient;
 import com.udacity.android.bakingapp.model.Recipe;
 import com.udacity.android.bakingapp.model.Step;
 import com.udacity.android.bakingapp.player.PlayerEventListener;
 import com.udacity.android.bakingapp.ui.adapter.RecipeIngredientsAdapter;
+import com.udacity.android.bakingapp.ui.viewmodel.RecipeSharedViewModel;
+import com.udacity.android.bakingapp.ui.viewmodel.RecipeSharedViewModelFactory;
+import com.udacity.android.bakingapp.utils.InjectorUtils;
+
+import org.parceler.Parcels;
+
+import java.util.List;
 
 import static com.udacity.android.bakingapp.utils.BakingAppConstants.APPLICATION_NAME;
 import static com.udacity.android.bakingapp.utils.BakingAppConstants.RECIPE_INGREDIENTS_KEY;
@@ -46,19 +56,31 @@ public class RecipeInstructionsFragment extends BaseFragment {
 
 
     private PlayerEventListener playerEventListener;
-
+    private Recipe mRecipe;
     private ListView mIngredientsListView;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
-
+    private RecipeSharedViewModel mViewModel;
     private CardView mContainerIngredients;
     private CardView mContainerStep;
     private TextView mInstructionsText;
     private ConstraintLayout mNavigationLayout;
     private Button mButtonNext;
     private Button mButtonPrevious;
+    private int mPosition;
+    private List<Ingredient> mIngredients;
+    private Step mStep;
+    private boolean isLastStep;
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        RecipeSharedViewModelFactory factory = InjectorUtils.provideRecipeSharedViewModelFactory(getContext());
+        mViewModel =  ViewModelProviders.of(getActivity(),factory).get(RecipeSharedViewModel.class);
+        loadData(mRecipe.getId(),mPosition);
+    }
 
     @Nullable
     @Override
@@ -78,57 +100,37 @@ public class RecipeInstructionsFragment extends BaseFragment {
         mIngredientsListView = view.findViewById(R.id.lv_ingredients);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            Recipe recipe = getArguments().getParcelable(RECIPE_KEY);
-            int position = getArguments().getInt(RECIPE_SELECTED_ACTION_KEY, -1);
-            if (recipe != null)
-                setRecipe(recipe, position);
+            mRecipe = Parcels.unwrap(getArguments().getParcelable(RECIPE_KEY));
+            mPosition = getArguments().getInt(RECIPE_SELECTED_ACTION_KEY, -1);
         }
+        if(isLandscapeMode()){
+            mNavigationLayout.setVisibility(View.GONE);
+        }else{
+            mNavigationLayout.setVisibility(View.VISIBLE);
+        }
+
         return view;
     }
 
-    public void setRecipe(Recipe recipe, int position) {
-        if (position == RECIPE_INGREDIENTS_KEY) {
-            RecipeIngredientsAdapter ingredientsAdapter = new RecipeIngredientsAdapter(recipe.getIngredients(), getContext());
-            mIngredientsListView.setAdapter(ingredientsAdapter);
-            showIngredients();
-        } else {
-            Step step = recipe.getSteps().get(position);
-            showStep();
-            if (!TextUtils.isEmpty(step.getVideoURL())) {
-                initPlayer(step.getVideoURL());
-            } else if (!TextUtils.isEmpty(step.getThumbnailURL())) {
-                initPlayer(step.getThumbnailURL());
-            } else {
-                mPlayerView.setVisibility(View.GONE);
-            }
-            mInstructionsText.setText(step.getDescription());
-        }
-        setNavigation(recipe,position);
+    public void setRecipe(long recipeId, int position) {
+       loadData(recipeId,position);
     }
 
-    private void setNavigation(Recipe recipe, final int position) {
-        if(position== RECIPE_INGREDIENTS_KEY){
-            mButtonPrevious.setEnabled(false);
-        }else{
-            mButtonPrevious.setEnabled(true);
+    private void setStep() {
+        showStep();
+        if (!TextUtils.isEmpty(mStep.getVideoURL())) {
+            initPlayer(mStep.getVideoURL());
+        } else if (!TextUtils.isEmpty(mStep.getThumbnailURL())) {
+            initPlayer(mStep.getThumbnailURL());
+        } else {
+            mPlayerView.setVisibility(View.GONE);
         }
-        mButtonPrevious.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setRecipe(recipe, position - 1);
-            }
-        });
-        if(position == recipe.getSteps().size()-1){
-            mButtonNext.setEnabled(false);
-        }else{
-            mButtonNext.setEnabled(true);
-        }
-        mButtonNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setRecipe(recipe, position + 1);
-            }
-        });
+        mInstructionsText.setText(mStep.getDescription());
+    }
+
+    private void setAdapter() {
+        RecipeIngredientsAdapter ingredientsAdapter = new RecipeIngredientsAdapter(mIngredients, getContext());
+        mIngredientsListView.setAdapter(ingredientsAdapter);
     }
 
     private void initPlayer(String videoUrl) {
@@ -140,15 +142,19 @@ public class RecipeInstructionsFragment extends BaseFragment {
     private void showIngredients() {
         mContainerIngredients.setVisibility(View.VISIBLE);
         mContainerStep.setVisibility(View.GONE);
+        mButtonPrevious.setEnabled(false);
+        mButtonNext.setEnabled(true);
     }
 
     private void showStep() {
         mContainerIngredients.setVisibility(View.GONE);
         mContainerStep.setVisibility(View.VISIBLE);
-        if (!isLandscapeMode()) {
-            mNavigationLayout.setVisibility(View.VISIBLE);
-        } else {
-            mNavigationLayout.setVisibility(View.GONE);
+        if(mStep.isLastStep()){
+            mButtonPrevious.setEnabled(true);
+            mButtonNext.setEnabled(false);
+        }else{
+            mButtonNext.setEnabled(true);
+            mButtonPrevious.setEnabled(true);
         }
     }
 
@@ -245,5 +251,38 @@ public class RecipeInstructionsFragment extends BaseFragment {
                 getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
         mExoPlayer.prepare(mediaSource);
         mExoPlayer.setPlayWhenReady(true);
+    }
+
+    private void loadData(long recipeId, int position) {
+        if(position == RECIPE_INGREDIENTS_KEY){
+            mViewModel.getIngredients(recipeId).observe(getViewLifecycleOwner(), new Observer<List<Ingredient>>() {
+                @Override
+                public void onChanged(@Nullable List<Ingredient> ingredients) {
+                    mIngredients = ingredients;
+                    setAdapter();
+                    showIngredients();
+                }
+            });
+        }else{
+            mViewModel.loadStepFromRecipe(position,recipeId).observe(getViewLifecycleOwner(), new Observer<Step>() {
+                @Override
+                public void onChanged(@Nullable Step step) {
+                    mStep = step;
+                    setStep();
+                }
+            });
+        }
+        mButtonPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setRecipe(recipeId,position - 1);
+            }
+        });
+        mButtonNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setRecipe(recipeId,position + 1);
+            }
+        });
     }
 }

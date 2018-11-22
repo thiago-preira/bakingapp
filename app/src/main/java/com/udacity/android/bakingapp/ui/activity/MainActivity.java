@@ -18,6 +18,8 @@ import com.udacity.android.bakingapp.ui.viewmodel.MainActivityViewModelFactory;
 import com.udacity.android.bakingapp.utils.DeviceUtils;
 import com.udacity.android.bakingapp.utils.InjectorUtils;
 
+import org.parceler.Parcels;
+
 import java.util.List;
 
 import static com.udacity.android.bakingapp.utils.BakingAppConstants.RECIPE_KEY;
@@ -39,7 +41,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void setViewModel() {
-        MainActivityViewModelFactory factory = InjectorUtils.provideMainActivityViewModelFactory();
+        MainActivityViewModelFactory factory = InjectorUtils.provideMainActivityViewModelFactory(this);
         mViewModel = ViewModelProviders.of(this, factory).get(MainActivityViewModel.class);
         mViewModel.getRecipes().observe(this, new Observer<List<Recipe>>() {
             @Override
@@ -71,7 +73,7 @@ public class MainActivity extends BaseActivity {
             public void onRecipeClick(View view, int position) {
                 Recipe recipe = mRecipes.get(position);
                 Intent recipeDetailIntent = new Intent(getContext(), RecipeDetailActivity.class);
-                recipeDetailIntent.putExtra(RECIPE_KEY, recipe);
+                recipeDetailIntent.putExtra(RECIPE_KEY, Parcels.wrap(recipe));
                 startActivity(recipeDetailIntent);
             }
         };

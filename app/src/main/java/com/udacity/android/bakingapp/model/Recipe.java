@@ -1,28 +1,29 @@
 package com.udacity.android.bakingapp.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 
-import java.util.ArrayList;
+import org.parceler.Parcel;
+
 import java.util.List;
 
-import static com.udacity.android.bakingapp.utils.BakingAppConstants.RECIPE_INGREDIENTS_KEY;
+@Parcel
+@Entity(tableName = "recipe")
+public class Recipe {
 
-public class Recipe implements Parcelable {
-
+    @PrimaryKey
     private long id;
-    private List<Ingredient> ingredients;
-    private List<Step> steps;
     private int servings;
     private String name;
     private String image;
+    @Ignore
+    private List<Ingredient> ingredients;
+    @Ignore
+    private List<Step> steps;
 
-
-
-    public Recipe(long id, List<Ingredient> ingredients, List<Step> steps, int servings, String name, String image) {
+    public Recipe(long id, int servings, String name, String image) {
         this.id = id;
-        this.ingredients = ingredients;
-        this.steps = steps;
         this.servings = servings;
         this.name = name;
         this.image = image;
@@ -30,14 +31,6 @@ public class Recipe implements Parcelable {
 
     public long getId() {
         return id;
-    }
-
-    public List<Ingredient> getIngredients() {
-        return ingredients;
-    }
-
-    public List<Step> getSteps() {
-        return steps;
     }
 
     public int getServings() {
@@ -52,30 +45,8 @@ public class Recipe implements Parcelable {
         return image;
     }
 
-    public List<Action> getActions() {
-        List<Action> actions = new ArrayList<>();
-
-        Action ingredients = new Action("INGREDIENTS",  RECIPE_INGREDIENTS_KEY);
-        actions.add(ingredients);
-
-        for (Step step : this.steps) {
-            Action stepAction = new Action(step.getShortDescription(), step.getId());
-            actions.add(stepAction);
-        }
-
-        return actions;
-    }
-
     public void setId(long id) {
         this.id = id;
-    }
-
-    public void setIngredients(List<Ingredient> ingredients) {
-        this.ingredients = ingredients;
-    }
-
-    public void setSteps(List<Step> steps) {
-        this.steps = steps;
     }
 
     public void setServings(int servings) {
@@ -90,63 +61,17 @@ public class Recipe implements Parcelable {
         this.image = image;
     }
 
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public List<Ingredient> getIngredients() {
+        return ingredients;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(this.id);
-        dest.writeList(this.ingredients);
-        dest.writeList(this.steps);
-        dest.writeInt(this.servings);
-        dest.writeString(this.name);
-        dest.writeString(this.image);
+    public List<Step> getSteps() {
+        return steps;
     }
 
+    @Ignore
     public Recipe() {
     }
 
-    protected Recipe(Parcel in) {
-        this.id = in.readLong();
-        this.ingredients = new ArrayList<Ingredient>();
-        in.readList(this.ingredients, Ingredient.class.getClassLoader());
-        this.steps = new ArrayList<Step>();
-        in.readList(this.steps, Step.class.getClassLoader());
-        this.servings = in.readInt();
-        this.name = in.readString();
-        this.image = in.readString();
-    }
-
-    public static final Parcelable.Creator<Recipe> CREATOR = new Parcelable.Creator<Recipe>() {
-        @Override
-        public Recipe createFromParcel(Parcel source) {
-            return new Recipe(source);
-        }
-
-        @Override
-        public Recipe[] newArray(int size) {
-            return new Recipe[size];
-        }
-    };
-
-    public String getIngredientsAsText(){
-        if(ingredients==null){
-            return "";
-        }
-
-        StringBuilder builder = new StringBuilder();
-        for (Ingredient ingredient: ingredients) {
-            String text = String.format("%s %s - %s \n",
-                    String.valueOf(ingredient.getQuantity()),
-                    ingredient.getMeasure(),
-                    ingredient.getIngredient()
-            );
-            builder.append(text);
-        }
-        return builder.toString();
-    }
 
 }

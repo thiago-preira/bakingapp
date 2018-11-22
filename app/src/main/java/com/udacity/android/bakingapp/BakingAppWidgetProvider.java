@@ -25,7 +25,7 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
 
         String widgetText = "Falhou";
        if(mRecipes!=null){
-           widgetText = mRecipes.get(0).getIngredientsAsText();
+           //widgetText = mRecipes.get(0).getIngredientsAsText();
        }
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.baking_app_widget);
@@ -45,8 +45,8 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onEnabled(Context context) {
-        RecipesRepository recipesRepository = InjectorUtils.provideRepository();
-        mRecipes = recipesRepository.getRecipes().getValue();
+//        RecipesRepository recipesRepository = InjectorUtils.provideRepository();
+//        mRecipes = recipesRepository.getRecipes().getValue();
         // Enter relevant functionality for when the first widget is created
     }
 

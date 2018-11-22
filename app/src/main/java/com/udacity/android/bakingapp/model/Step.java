@@ -1,22 +1,42 @@
 package com.udacity.android.bakingapp.model;
 
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 
-public class Step implements Parcelable {
+import org.parceler.Parcel;
+
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
+@Parcel
+@Entity(tableName = "step",
+        foreignKeys = @ForeignKey(entity = Recipe.class
+                , parentColumns = "id",
+                childColumns = "recipeId",
+                onDelete = CASCADE))
+public class Step {
+
+    @PrimaryKey(autoGenerate = true)
+    private long stepId;
     private int id;
     private String shortDescription;
     private String description;
     private String videoURL;
     private String thumbnailURL;
+    private long recipeId;
+    private boolean lastStep;
 
-    public Step(int id, String shortDescription, String description, String videoURL, String thumbnailURL) {
+    public Step(long stepId, int id, String shortDescription, String description, String videoURL, String thumbnailURL, long recipeId, boolean lastStep) {
+        this.stepId = stepId;
         this.id = id;
         this.shortDescription = shortDescription;
         this.description = description;
         this.videoURL = videoURL;
         this.thumbnailURL = thumbnailURL;
+        this.recipeId = recipeId;
+        this.lastStep = lastStep;
     }
 
     public int getId() {
@@ -39,41 +59,54 @@ public class Step implements Parcelable {
         return thumbnailURL;
     }
 
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public long getRecipeId() {
+        return recipeId;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.id);
-        dest.writeString(this.shortDescription);
-        dest.writeString(this.description);
-        dest.writeString(this.videoURL);
-        dest.writeString(this.thumbnailURL);
+    public void setId(int id) {
+        this.id = id;
     }
 
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setVideoURL(String videoURL) {
+        this.videoURL = videoURL;
+    }
+
+    public void setThumbnailURL(String thumbnailURL) {
+        this.thumbnailURL = thumbnailURL;
+    }
+
+    public void setRecipeId(long recipeId) {
+        this.recipeId = recipeId;
+    }
+
+    public long getStepId() {
+        return stepId;
+    }
+
+    public void setStepId(long stepId) {
+        this.stepId = stepId;
+    }
+
+
+    public boolean isLastStep() {
+        return lastStep;
+    }
+
+    public void setLastStep(boolean lastStep) {
+        this.lastStep = lastStep;
+    }
+
+    @Ignore
     public Step() {
     }
 
-    protected Step(Parcel in) {
-        this.id = in.readInt();
-        this.shortDescription = in.readString();
-        this.description = in.readString();
-        this.videoURL = in.readString();
-        this.thumbnailURL = in.readString();
-    }
 
-    public static final Parcelable.Creator<Step> CREATOR = new Parcelable.Creator<Step>() {
-        @Override
-        public Step createFromParcel(Parcel source) {
-            return new Step(source);
-        }
-
-        @Override
-        public Step[] newArray(int size) {
-            return new Step[size];
-        }
-    };
 }

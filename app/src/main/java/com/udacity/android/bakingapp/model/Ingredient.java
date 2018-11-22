@@ -1,17 +1,35 @@
 package com.udacity.android.bakingapp.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 
-public class Ingredient implements Parcelable {
+import org.parceler.Parcel;
+
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
+@Parcel
+@Entity(tableName = "ingredient",
+        foreignKeys = @ForeignKey(entity = Recipe.class,
+                parentColumns = "id",
+                childColumns = "recipeId",
+                onDelete = CASCADE)
+)
+public class Ingredient {
+    @PrimaryKey(autoGenerate = true)
+    private long id;
     private double quantity;
     private String measure;
     private String ingredient;
+    private long recipeId;
 
-    public Ingredient(double quantity, String measure, String ingredient) {
+    public Ingredient(long id, double quantity, String measure, String ingredient, long recipeId) {
+        this.id = id;
         this.quantity = quantity;
         this.measure = measure;
         this.ingredient = ingredient;
+        this.recipeId = recipeId;
     }
 
     public double getQuantity() {
@@ -26,37 +44,35 @@ public class Ingredient implements Parcelable {
         return ingredient;
     }
 
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public long getRecipeId() {
+        return recipeId;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeDouble(this.quantity);
-        dest.writeString(this.measure);
-        dest.writeString(this.ingredient);
+    public void setQuantity(double quantity) {
+        this.quantity = quantity;
     }
 
+    public void setMeasure(String measure) {
+        this.measure = measure;
+    }
+
+    public void setIngredient(String ingredient) {
+        this.ingredient = ingredient;
+    }
+
+    public void setRecipeId(long recipeId) {
+        this.recipeId = recipeId;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    @Ignore
     public Ingredient() {
     }
-
-    protected Ingredient(Parcel in) {
-        this.quantity = in.readDouble();
-        this.measure = in.readString();
-        this.ingredient = in.readString();
-    }
-
-    public static final Parcelable.Creator<Ingredient> CREATOR = new Parcelable.Creator<Ingredient>() {
-        @Override
-        public Ingredient createFromParcel(Parcel source) {
-            return new Ingredient(source);
-        }
-
-        @Override
-        public Ingredient[] newArray(int size) {
-            return new Ingredient[size];
-        }
-    };
 }
